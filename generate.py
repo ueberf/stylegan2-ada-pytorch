@@ -165,7 +165,7 @@ def images(G,device,inputs,space,truncation_psi,label,noise_mode,outdir,start=No
               i = torch.from_numpy(i).unsqueeze(0).to(device)
             img = G.synthesis(i, noise_mode=noise_mode, force_fp32=True)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{idx:04d}.png')
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{idx:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
 def interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,outdir,interpolation,easing,diameter,start=None,stop=None):
     if(interpolation=='noiseloop' or interpolation=='circularloop'):
@@ -252,7 +252,7 @@ def truncation_traversal(G,device,z,label,start,stop,increment,noise_mode,outdir
         
         img = G(z, label, truncation_psi=trunc, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{count:04d}.png')
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{count:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
         trunc+=increment
         count+=1
@@ -299,6 +299,7 @@ def zs_to_ws(G,device,label,truncation_psi,zs):
 @click.option('--start', type=float, help='starting truncation value', default=0.0, show_default=True)
 @click.option('--stop', type=float, help='stopping truncation value', default=1.0, show_default=True)
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
+@click.option('--jpg_quality', type=int, help='Quality of exported images 1-100', default=0, show_default=True)
 
 def generate_images(
     ctx: click.Context,
@@ -322,6 +323,7 @@ def generate_images(
     projected_w: Optional[str],
     start: Optional[float],
     stop: Optional[float],
+    jpg_quality: Optional[int],
 ):
     """Generate images using pretrained network pickle.
 
@@ -359,6 +361,11 @@ def generate_images(
     G_kwargs = dnnlib.EasyDict()
     G_kwargs.size = size 
     G_kwargs.scale_type = scale_type
+
+    # Rendering format
+    optimized = bool(jpg_quality)
+    image_format = 'jpg' if jpg_quality else 'png'
+    jpg_quality = int(np.clip(jpg_quality, 1, 95)) # 'quality' keyword option ignored for PNG encoding
 
     # mask/blend latents with external latmask or by splitting the frame
     latmask = False #temp
@@ -402,7 +409,7 @@ def generate_images(
         for idx, w in enumerate(ws):
             img = G.synthesis(w.unsqueeze(0), noise_mode=noise_mode)
             img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.png')
+            img = PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/proj{idx:02d}.{image_format}', optimize=optimized, quality=jpg_quality)
         return
 
     # Labels.
@@ -426,7 +433,7 @@ def generate_images(
             z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
             img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
             img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.png')
+            PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
     elif(process=='interpolation' or process=='interpolation-truncation'):
         # create path for frames
@@ -446,7 +453,7 @@ def generate_images(
             interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter)
 
         # convert to video
-        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.png -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
+        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
         subprocess.call(cmd, shell=True)
 
     elif(process=='truncation'):
@@ -465,7 +472,7 @@ def generate_images(
         truncation_traversal(G,device,seeds,label,start,stop,increment,noise_mode,dirpath)
 
         # convert to video
-        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.png -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
+        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
         subprocess.call(cmd, shell=True)
 
 #----------------------------------------------------------------------------
