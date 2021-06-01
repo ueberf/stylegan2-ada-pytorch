@@ -17,6 +17,9 @@
 * **Output size modification** Thank you to [Vadim Epstein](https://github.com/eps696/stylegan2ada) for allowing me to port his code for modifying output size for image and video generation. See `--size` and `--scale-type` in the generation script for more details.
 * **Flesh digressions script** based on Aydao script (ported by [grddavies](https://github.com/grddavies), thanks!)
 
+## Next steps
+* **JPG output**: generate .jpg instead of .png to save storage space
+
 ## StyleGAN2-ADA &mdash; Official PyTorch implementation
 
 ![Teaser image](./docs/stylegan2-ada-teaser-1024x252.png)
