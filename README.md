@@ -18,7 +18,7 @@
 * **Flesh digressions script** based on Aydao script (ported by [grddavies](https://github.com/grddavies), thanks!)
 
 ## Next steps
-* **JPG output**: generate .jpg instead of .png to save storage space
+* **JPG output**: generate .jpg instead of .png to save storage space (in work)
 
 ## StyleGAN2-ADA &mdash; Official PyTorch implementation
 
