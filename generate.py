@@ -145,7 +145,7 @@ def noiseloop(nf, d, seed):
 
     return zs
 
-def images(G,device,inputs,space,truncation_psi,label,noise_mode,outdir,start=None,stop=None):
+def images(G,device,inputs,space,truncation_psi,label,noise_mode,outdir,start=None,stop=None,image_format):
     if(start is not None and stop is not None):
         tp = start
         tp_i = (stop-start)/len(inputs)
@@ -167,7 +167,7 @@ def images(G,device,inputs,space,truncation_psi,label,noise_mode,outdir,start=No
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
         PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{idx:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
-def interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,outdir,interpolation,easing,diameter,start=None,stop=None):
+def interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,outdir,interpolation,easing,diameter,start=None,stop=None,image_format):
     if(interpolation=='noiseloop' or interpolation=='circularloop'):
         if seeds is not None:
             print(f'Warning: interpolation type: "{interpolation}" doesn’t support set seeds.')
@@ -196,7 +196,7 @@ def interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,labe
             else:
                 points = slerp_interpolate(points,frames)
     # generate frames
-    images(G,device,points,space,truncation_psi,label,noise_mode,outdir,start,stop)
+    images(G,device,points,space,truncation_psi,label,noise_mode,outdir,start,stop,image_format)
 
 def seeds_to_zs(G,seeds):
     zs = []
@@ -448,9 +448,9 @@ def generate_images(
             vidname = f'{process}-{interpolation}-{diameter}dia-seed_{random_seed}-{fps}fps'
 
         if process=='interpolation-truncation':
-            interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter,start,stop)
+            interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter,start,stop,image_format)
         else:
-            interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter)
+            interpolate(G,device,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter,image_format)
 
         # convert to video
         cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
