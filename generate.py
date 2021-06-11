@@ -403,6 +403,7 @@ def generate_images(
     #Check if looping is true and append the first seed to the end of the seed array
     if looping:
         seeds.append(seeds[0])
+        print(seeds)
         return seeds
     else:
         pass
