@@ -401,10 +401,10 @@ def generate_images(
     os.makedirs(outdir, exist_ok=True)
 
     #Check if looping is true and append the first seed to the end of the seed array
-    if looping
+    if looping:
         seeds.append(seeds[0])
         return seeds
-    else
+    else:
         pass
 
     # Synthesize the result of a W projection.
