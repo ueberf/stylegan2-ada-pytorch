@@ -240,7 +240,7 @@ def slerp_interpolate(zs, steps):
             out.append(slerp(fraction,zs[i],zs[i+1]))
     return out
 
-def truncation_traversal(G,device,z,label,start,stop,increment,noise_mode,outdir):
+def truncation_traversal(G,device,image_format,jpg_quality,optimized,z,label,start,stop,increment,noise_mode,outdir):
     count = 1
     trunc = start
 
@@ -469,7 +469,7 @@ def generate_images(
         vidname = f'{process}-seed_{seed}-start_{start}-stop_{stop}-inc_{increment}-{fps}fps'
 
         # generate frames
-        truncation_traversal(G,device,seeds,label,start,stop,increment,noise_mode,dirpath)
+        truncation_traversal(G,device,image_format,jpg_quality,optimized,seeds,label,start,stop,increment,noise_mode,dirpath)
 
         # convert to video
         cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
