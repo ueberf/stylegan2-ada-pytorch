@@ -400,7 +400,8 @@ def generate_images(
 
     os.makedirs(outdir, exist_ok=True)
 
-    if looping is True
+    #Check if looping is true and append the first seed to the end of the seed array
+    if looping
         seeds.append(seeds[0])
         return seeds
     else
