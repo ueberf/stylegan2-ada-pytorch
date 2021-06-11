@@ -404,7 +404,6 @@ def generate_images(
     if looping:
         seeds.append(seeds[0])
         print(seeds)
-        return seeds
     else:
         pass
 
