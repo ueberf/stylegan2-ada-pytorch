@@ -300,6 +300,7 @@ def zs_to_ws(G,device,label,truncation_psi,zs):
 @click.option('--stop', type=float, help='stopping truncation value', default=1.0, show_default=True)
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
 @click.option('--jpg_quality', type=int, help='Quality of exported images 1-100', default=0, show_default=True)
+@click.option('--looping', type=bool, help='Appends the first seed to the end of a linear interpolation(default: false)', default=False, show_default=True,metavar='BOOL')
 
 def generate_images(
     ctx: click.Context,
@@ -324,6 +325,7 @@ def generate_images(
     start: Optional[float],
     stop: Optional[float],
     jpg_quality: Optional[int],
+    looping: Optional[bool],
 ):
     """Generate images using pretrained network pickle.
 
@@ -397,6 +399,12 @@ def generate_images(
         G = legacy.load_network_pkl(f, custom=custom, **G_kwargs)['G_ema'].to(device) # type: ignore
 
     os.makedirs(outdir, exist_ok=True)
+
+    if looping is True
+        seeds.append(seeds[0])
+        return seeds
+    else
+        pass
 
     # Synthesize the result of a W projection.
     if (process=='image') and projected_w is not None:
