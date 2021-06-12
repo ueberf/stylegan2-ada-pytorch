@@ -458,7 +458,7 @@ def generate_images(
         # autogenerate video name: not great!
         if seeds is not None:
             if len(seeds) > 20:
-                seedstr = '_'.join([str(seeds[0]),str(seeds[1]),'---n',str(len(seeds)),'--',str(seeds[-2]),str(seeds[-1])])
+                seedstr = '_'.join([str(seeds[0]),str(seeds[1]),'--_n',str(len(seeds)),'--',str(seeds[-2]),str(seeds[-1])])
             else:
                 seedstr = '_'.join([str(seed) for seed in seeds])    
             vidname = f'{process}-{interpolation}-seeds_{seedstr}-{fps}fps'
