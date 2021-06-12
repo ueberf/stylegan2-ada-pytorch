@@ -407,13 +407,11 @@ def generate_images(
     #Check if looping is true and append the first seed to the end of the seed array
     if first_seed:
         seeds.insert(0, first_seed)
-    elif last_seed:
+    if last_seed:
         seeds.append(last_seed)
-    elif looping:
+    if looping:
         seeds.append(seeds[0])
-        print(seeds)
-    else:
-        pass
+
 
     # Synthesize the result of a W projection.
     if (process=='image') and projected_w is not None:
