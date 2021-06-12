@@ -301,6 +301,8 @@ def zs_to_ws(G,device,label,truncation_psi,zs):
 @click.option('--trunc', 'truncation_psi', type=float, help='Truncation psi', default=1, show_default=True)
 @click.option('--jpg_quality', type=int, help='Quality of exported images 1-100', default=0, show_default=True)
 @click.option('--looping', type=bool, help='Appends the first seed to the end of a linear interpolation(default: false)', default=False, show_default=True,metavar='BOOL')
+@click.option('--first_seed', type=int, help='Overrides the beginning seed of a seed range', default=0, show_default=True)
+@click.option('--last_seed', type=int, help='Overrides the ending seed of a seed range', default=0, show_default=True)
 
 def generate_images(
     ctx: click.Context,
@@ -326,6 +328,8 @@ def generate_images(
     stop: Optional[float],
     jpg_quality: Optional[int],
     looping: Optional[bool],
+    first_seed: Optional[int],
+    last_seed: Optional[int],
 ):
     """Generate images using pretrained network pickle.
 
@@ -401,7 +405,11 @@ def generate_images(
     os.makedirs(outdir, exist_ok=True)
 
     #Check if looping is true and append the first seed to the end of the seed array
-    if looping:
+    if first_seed:
+        seeds.insert(0, first_seed)
+    elif last_seed:
+        seeds.append(last_seed)
+    elif looping:
         seeds.append(seeds[0])
         print(seeds)
     else:
@@ -451,7 +459,10 @@ def generate_images(
 
         # autogenerate video name: not great!
         if seeds is not None:
-            seedstr = '_'.join([str(seed) for seed in seeds])
+            if len(seeds) > 20:
+                seedstr = '_'.join([str(seed[0]),str(seed[1]),'---n',str(len(seeds)),'--',str(seeds[-2]),str(seeds[-1])])
+            else:
+                seedstr = '_'.join([str(seed) for seed in seeds])    
             vidname = f'{process}-{interpolation}-seeds_{seedstr}-{fps}fps'
         elif(interpolation=='noiseloop' or 'circularloop'):
             vidname = f'{process}-{interpolation}-{diameter}dia-seed_{random_seed}-{fps}fps'
@@ -462,7 +473,7 @@ def generate_images(
             interpolate(G,device,image_format,jpg_quality,optimized,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,dirpath,interpolation,easing,diameter)
 
         # convert to video
-        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
+        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%05d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
         subprocess.call(cmd, shell=True)
 
     elif(process=='truncation'):
@@ -481,7 +492,7 @@ def generate_images(
         truncation_traversal(G,device,image_format,jpg_quality,optimized,seeds,label,start,stop,increment,noise_mode,dirpath)
 
         # convert to video
-        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%04d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
+        cmd=f'ffmpeg -y -r {fps} -i {dirpath}/frame%05d.{image_format} -vcodec libx264 -pix_fmt yuv420p {outdir}/{vidname}.mp4'
         subprocess.call(cmd, shell=True)
 
 #----------------------------------------------------------------------------
