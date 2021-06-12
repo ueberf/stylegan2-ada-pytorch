@@ -165,7 +165,7 @@ def images(G,device,image_format,jpg_quality,optimized,inputs,space,truncation_p
               i = torch.from_numpy(i).unsqueeze(0).to(device)
             img = G.synthesis(i, noise_mode=noise_mode, force_fp32=True)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{idx:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{idx:05d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
 def interpolate(G,device,image_format,jpg_quality,optimized,projected_w,seeds,random_seed,space,truncation_psi,label,frames,noise_mode,outdir,interpolation,easing,diameter,start=None,stop=None):
     if(interpolation=='noiseloop' or interpolation=='circularloop'):
@@ -252,7 +252,7 @@ def truncation_traversal(G,device,image_format,jpg_quality,optimized,z,label,sta
         
         img = G(z, label, truncation_psi=trunc, noise_mode=noise_mode)
         img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{count:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
+        PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/frame{count:05d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
         trunc+=increment
         count+=1
@@ -450,7 +450,7 @@ def generate_images(
             z = torch.from_numpy(np.random.RandomState(seed).randn(1, G.z_dim)).to(device)
             img = G(z, label, truncation_psi=truncation_psi, noise_mode=noise_mode)
             img = (img.permute(0, 2, 3, 1) * 127.5 + 128).clamp(0, 255).to(torch.uint8)
-            PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:04d}.{image_format}', optimize=optimized, quality=jpg_quality)
+            PIL.Image.fromarray(img[0].cpu().numpy(), 'RGB').save(f'{outdir}/seed{seed:05d}.{image_format}', optimize=optimized, quality=jpg_quality)
 
     elif(process=='interpolation' or process=='interpolation-truncation'):
         # create path for frames
